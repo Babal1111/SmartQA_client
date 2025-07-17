@@ -4,7 +4,9 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { serverEndpoint } from "../config/appConfig";
-import socket from "../config/socket";
+// import socket from "../config/socket";
+import {io} from 'socket.io-client';
+
 function Room(){
     const { code } = useParams(); // code we have define in app.js, in routes it should be same
     const [loading,setLoading] = useState(true); // by default true, as hame initialy load to krna hi h, to get room details
@@ -52,6 +54,7 @@ function Room(){
     useEffect(()=>{
         // fetchQustion();
         // fetchRoom();  noX  as this are async
+        const socket = io(serverEndpoint);
         const fetchData = async()=>{
             await fetchQustion();
             await fetchRoom();

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 function Home(){
     return (
         <div className="container text-center py-5">
-        <h2 className="mb-4">Smart QA= Get Started</h2>
+        <h2 className="mb-4">Smart QA Get Started</h2>
         <p className="lead mb-5">Get started with Smart QA and discover the power of</p>
         <p className="mb-4">
             if you are participant click on join room.

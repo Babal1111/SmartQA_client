@@ -13,6 +13,18 @@ function Room(){
     const [errors,setErrors] = useState({});
     // we ant to get room details,questions, etc on load so we use useEffect
 
+    const [summaries,setSummaries] = useState([]);
+
+    const fetchSummary = async()=>{
+        try {
+            const response = await axios.get(`${serverEndpoint}/room/${code}/summary`,{withCredentials: true});
+            setSummaries(response.data || []); // agar summary nhi to initalise with empty arr
+        } catch (error) {
+            console.error(error);
+            setErrors({message: 'uable fetch question summaries from gemini, try again later'})
+        }
+    }
+
     const fetchRoom = async()=>{
         try {
             const response = await axios.get(`${serverEndpoint}/room/${code}`,{
@@ -37,18 +49,15 @@ function Room(){
             
         }
     }
-
     useEffect(()=>{
         // fetchQustion();
-        // fetchRoom();  no as this are async
+        // fetchRoom();  noX  as this are async
         const fetchData = async()=>{
             await fetchQustion();
             await fetchRoom();
             setLoading(false);
         }
-            console.log("in room.jsx");
-
-
+            // console.log("in room.jsx");
         fetchData();
         socket.emit("join-room",code);
         socket.on("new-question", (question)=>{
@@ -75,12 +84,19 @@ function Room(){
        <div className="container py-5">
         {console.log("in return function")}
         <h2>Room {code} created by {room.createdBy}</h2>
-        <div className="row">
+        <button className="btn btn-outline-success" onClick={fetchSummary}>Get Top Questions</button>
+        <hr/>
+       <ul className="list-group mb-4">
+        {summaries.map((sum, idx) => (
+            <li key={idx} className="list-group-item">{sum}</li>
+        ))}
+        </ul>   
+        <div className="row"> 
             <div className="col-auto">
                 <ul className="list-group">
                     {questions.map((question)=>(
                         <li key={question._id} className="list-group-items">
-                            <h4>{question.content}</h4>
+                            <h4>{question.user}: {question.content}</h4> 
                         </li>
                     ))}
                 </ul>

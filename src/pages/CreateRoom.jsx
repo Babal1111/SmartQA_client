@@ -6,7 +6,7 @@ function CreateRoom(){
     const navigate = useNavigate();
     const [name,setName] = useState(null);
     const [errors,setErrors] = useState({});
-
+    const [keywords,setKeywords] = useState(null);
     const validate=()=>{
         const newErrors = {};
         let isValid = true;
@@ -22,7 +22,8 @@ function CreateRoom(){
     const handelSubmit=async()=>{
         if(validate()){
             const response = await axios.post(`${serverEndpoint}/room`,{
-                createdBy:name
+                createdBy:name,
+                keywords:keywords
             },{withCredentials:true});
             const roomCode = response.data.roomCode;
             navigate(`/room/${roomCode}`);
@@ -39,6 +40,12 @@ function CreateRoom(){
                         className={errors.name? "form-control is-invalid": "form-control"} 
                         value={name} onChange={(e)=>setName(e.target.value)} />
                         <div className="invalid feedback">{errors.name}</div>
+                        <br></br>
+                        <label htmlFor="name">Keywords:</label>
+                        <input type="text" id="keywords" name="keywords"
+                        className={errors.keywords? "form-control is-invalid": "form-control"} placeholder="Enter keywords seperated by comma"
+                        value={keywords} onChange={(e)=>setKeywords(e.target.value)} />
+                        <div className="invalid feedback">{errors.keywords}</div>
                     </div>
                     <div className="mb-3">
                         <button type="submit" onClick={()=>handelSubmit()} className="btn btn-primary">Submit</button>

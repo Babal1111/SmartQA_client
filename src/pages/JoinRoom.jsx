@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import {serverEndpoint} from "../config/appConfig";
+import { useDispatch } from "react-redux";
+import { SET_USER } from "../redux/user/action";
+import axios from "axios";
 
 function JoinRoom(){
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     
     const [errors,setErrors] = useState({});
     const [roomCode,setRoomCode] = useState("");
     const [name,setName] = useState("");
-
 
     const isValid=()=>{
         let isValid=true;
@@ -26,10 +29,25 @@ function JoinRoom(){
         return isValid;
     }
 
-    const handleSubmit=()=>{
+    const handleSubmit=async()=>{
         if(isValid()){
-            localStorage.setItem("participant-name",name);
+            // localStorage.setItem("participant-name",name);
             // console.log("navigating to room.jsx");
+
+        try {
+         const response = await axios.post(`${serverEndpoint}/room/${roomCode}/joinRoom`,{
+            name:name
+         },{withCredentials: true});
+
+         dispatch({
+            type: SET_USER,
+            payload: response.data.userDetails
+         })
+        updateUserDetails(response.data);
+        } catch (error) {
+            console.log(error);
+            
+        }
           navigate(`/room/${roomCode}`);
         }
         // well check if this is valid roomCode or not in Room.jsx when we get it through params not here

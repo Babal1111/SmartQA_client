@@ -6,13 +6,17 @@ import axios from "axios";
 import { serverEndpoint } from "../config/appConfig";
 // import socket from "../config/socket";
 import {io} from 'socket.io-client';
+import { useSelector } from "react-redux";
 
 function Room(){
+    const userDetails = useSelector((state)=>state.userDetails);
     const { code } = useParams(); // code we have define in app.js, in routes it should be same
     const [loading,setLoading] = useState(true); // by default true, as hame initialy load to krna hi h, to get room details
     const [room,setRoom] = useState(null);
     const [questions,setQuestions] = useState([]);
     const [errors,setErrors] = useState({});
+    const [role,setRole] = useState(null);
+    
     // we ant to get room details,questions, etc on load so we use useEffect
 
     const [summaries,setSummaries] = useState([]);
@@ -82,31 +86,36 @@ function Room(){
         return <div className="container text-center">{errors.message}</div>
     }
     console.log("no errors no loading");
+    console.log(userDetails)
     return(
         
        <div className="container py-5">
         {console.log("in return function")}
-        <h2>Room {code} created by {room.createdBy}</h2>
-        <button className="btn btn-outline-success" onClick={fetchSummary}>Get Top Questions</button>
-        <hr/>
-       <ul className="list-group mb-4">
-        {summaries.map((sum, idx) => (
+        <h2>Room {code} created by   {userDetails && ` ${userDetails.name} ${userDetails.role} `}
+</h2>
+        {userDetails?.role === "admin" && (
+             <button className="btn btn-outline-success" onClick={fetchSummary}>
+                Get Top Questions
+         </button>
+        )}        <hr/>
+        {userDetails?.role ==="admin" && (<ul className="list-group mb-4">
+       {summaries.map((sum, idx) => (
             <li key={idx} className="list-group-item">{sum}</li>
         ))}
-        </ul>   
-        <div className="row"> 
+        </ul>)}
+        {userDetails?.role ==="user" && (<div className="row"> 
             <div className="col-auto">
                 <ul className="list-group">
                     {questions.map((question)=>(
-                        <li key={question._id} className="list-group-items">
+                        <li key={question._id} className="list-group-item">
                             <h4>{question.user}: {question.content}</h4> 
                         </li>
                     ))}
                 </ul>
 
             </div>
-        </div>
-        <Question roomCode={code}/>
+        </div>)}
+         {userDetails?.role ==="user" && (<Question roomCode={code}/>)}
        </div>
     )
 }

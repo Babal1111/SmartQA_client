@@ -2,11 +2,11 @@ import { useState } from "react";
 import { serverEndpoint } from "../config/appConfig";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-function CreateRoom(){
+function CreateRoom({userDetails}){
     const navigate = useNavigate();
-    const [name,setName] = useState(null);
+    const [name,setName] = useState("");
     const [errors,setErrors] = useState({});
-    const [keywords,setKeywords] = useState(null);
+    const [keywords,setKeywords] = useState("null");
     const validate=()=>{
         const newErrors = {};
         let isValid = true;
@@ -31,7 +31,7 @@ function CreateRoom(){
     }
     return(
         <div className="container text=center py-5">
-            <h2 className="mb-4">Create Room</h2>
+            <h2 className="mb-4">  Create Room (logged in user: {userDetails?.name || "Guest"})   </h2>
             <div className="row">
                 <div className="col-md-5">
                     <div className=" mb-3"> 

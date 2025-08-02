@@ -1,16 +1,14 @@
 import { useState } from "react";
 import axios from 'axios';
-// import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { serverEndpoint } from "../config/appConfig";
-// import { useDispatch } from "react-redux";
-// import { SET_USER } from "../redux/user/actions";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
-    // const dispatch = useDispatch();
+function Register() {
     const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
-        username: "",
+        name: "",
+        email: "",
         password: ""
     });
 
@@ -29,26 +27,33 @@ function Login() {
     const validate = () => {
         let newErrors = {};
         let isValid = true;
-        if (formData.username.length === 0) {
-            newErrors.username = "Username is mandatory";
+
+        if (formData.name.trim().length === 0) {
+            newErrors.name = "Name is mandatory";
             isValid = false;
         }
 
-        if (formData.password.length === 0) {
+        if (formData.email.trim().length === 0) {
+            newErrors.email = "Email is mandatory";
+            isValid = false;
+        }
+
+        if (formData.password.trim().length === 0) {
             newErrors.password = "Password is mandatory";
             isValid = false;
         }
 
         setErrors(newErrors);
         return isValid;
-    }
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         if (validate()) {
             const body = {
-                email: formData.username,
+                name: formData.name,
+                email: formData.email,
                 password: formData.password
             };
             const configuration = {
@@ -56,16 +61,18 @@ function Login() {
             };
             try {
                 const response = await axios.post(
-                    `${serverEndpoint}/auth/login`,
-                    body, configuration);
-                // dispatch({
-                //     type: SET_USER,
-                //     payload: response.data.userDetails
-                // });
-                    navigate("/home");
+                    `${serverEndpoint}/auth/register`,
+                    body,
+                    configuration
+                );
+
+                // ✅ Navigate to homepage if registration successful
+                navigate("/");
+
             } catch (error) {
-                if (error?.response?.status === 401) {
-                    setErrors({ message: 'Invalid credentials' });
+                console.error(error);
+                if (error?.response?.status === 400) {
+                    setErrors({ message: error.response.data.message || 'User already exists' });
                 } else {
                     setErrors({ message: 'Something went wrong, please try again' });
                 }
@@ -73,56 +80,49 @@ function Login() {
         }
     };
 
-    const handleGoogleSignin = async (authResponse) => {
-        try {
-            const response = await axios.post(`${serverEndpoint}/auth/google-auth`, {
-                idToken: authResponse.credential
-            }, {
-                withCredentials: true
-            });
-
-            // dispatch({
-            //     type: SET_USER,
-            //     payload: response.data.userDetails
-            // });
-        } catch (error) {
-            console.log(error);
-            setErrors({ message: 'Something went wrong while google signin' });
-        }
-    };
-
-    const handleGoogleSigninFailure = async (error) => {
-        console.log(error);
-        setErrors({ message: 'Something went wrong while google signin' });
-    };
-
     return (
         <div className="container py-5">
             <div className="row justify-content-center">
                 <div className="col-md-4">
-                    <h2 className="text-center mb-4">Sign in to Continue</h2>
+                    <h2 className="text-center mb-4">Register</h2>
 
-                    {/* Error Alert */}
                     {errors.message && (
                         <div className="alert alert-danger" role="alert">
                             {errors.message}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <div className="mb-3">
-                            <label htmlFor="username" className="form-label">Username</label>
+                            <label htmlFor="name" className="form-label">Name</label>
                             <input
                                 type="text"
-                                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                                id="username"
-                                name="username"
-                                value={formData.username}
+                                className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                                id="name"
+                                name="name"
+                                value={formData.name}
                                 onChange={handleChange}
                             />
-                            {errors.username && (
+                            {errors.name && (
                                 <div className="invalid-feedback">
-                                    {errors.username}
+                                    {errors.name}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="email" className="form-label">Email</label>
+                            <input
+                                type="email"
+                                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                            />
+                            {errors.email && (
+                                <div className="invalid-feedback">
+                                    {errors.email}
                                 </div>
                             )}
                         </div>
@@ -145,27 +145,31 @@ function Login() {
                         </div>
 
                         <div className="d-grid">
-                            <button type="submit" className="btn btn-primary">Submit</button>
+                            <button type="submit" className="btn btn-primary">Register</button>
                         </div>
                     </form>
 
+                    {/* Optional Google Sign-In */}
+                    {/* Uncomment if you're using Google OAuth */}
+                    {/*
                     <div className="text-center">
                         <div className="my-4 d-flex align-items-center text-muted">
                             <hr className="flex-grow-1" />
                             <span className="px-2">OR</span>
                             <hr className="flex-grow-1" />
                         </div>
-                        {/* <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                        <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
                             <GoogleLogin
                                 onSuccess={handleGoogleSignin}
                                 onError={handleGoogleSigninFailure}
                             />
-                        </GoogleOAuthProvider> */}
+                        </GoogleOAuthProvider>
                     </div>
+                    */}
                 </div>
             </div>
         </div>
     );
 }
 
-export default Login;
+export default Register;

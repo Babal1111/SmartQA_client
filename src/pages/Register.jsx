@@ -67,7 +67,7 @@ function Register() {
 
     try {
       await axios.post(`${serverEndpoint}/auth/register`, body, configuration);
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       if (error?.response?.status === 400) {
         setErrors({

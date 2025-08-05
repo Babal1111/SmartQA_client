@@ -1,18 +1,35 @@
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-
+import { serverEndpoint } from "../config/appConfig";
+import axios from 'axios';
 function Home() {
   const userDetails = useSelector((state) => state.userDetails);
   const [stats, setStats] = useState({
-    totalQuestions: 1243,
-    totalSessions: 189,
-    totalParticipants: 876,
-    activeSessions: 12
+    totalQuestions: 0,
+    totalSessions: 0,
+    totalParticipants: 0,
   });
+const getStats = async () => {
+  try {
+    const response = await axios.get(`${serverEndpoint}/stats/getAllStats`, {
+      withCredentials: true
+    });
+
+    setStats(prev => ({
+      ...prev,
+      totalQuestions: response.data.totalQuestions,
+      totalSessions: response.data.totalRooms,
+      totalParticipants: response.data.totalUsers,
+    }));
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+  }
+};
 
   useEffect(() => {
     console.log('userDetails changed in Home', userDetails);
+    getStats();
     // Here you would typically fetch stats from your API
     // Example:
     // const fetchStats = async () => {
@@ -35,7 +52,7 @@ function Home() {
         </div>
 
         {/* Statistics Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center">
               <div className="p-3 rounded-lg bg-indigo-100 text-indigo-600 mr-4">
@@ -78,19 +95,7 @@ function Home() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-yellow-100 text-yellow-600 mr-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Active Now</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.activeSessions}</p>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         <div className="bg-white rounded-xl shadow-xl overflow-hidden mb-12">
@@ -108,7 +113,9 @@ function Home() {
             ) : (
               <div className="mb-8 text-center">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Smart QA</h2>
-                <p className="text-gray-600">Please sign in to create or join a room</p>
+                  <p className="text-lg font-semibold text-indigo-600 animate-pulse">
+  Please sign in to create or join a room
+                  </p>
               </div>
             )}
 
